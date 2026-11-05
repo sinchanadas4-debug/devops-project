@@ -1,0 +1,79 @@
+services:
+  user-service:
+    image: ${REGISTRY}/user-service:${IMAGE_TAG}
+    container_name: user-service
+    environment:
+      - APP_ENV=production
+    networks:
+      - app-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5001/health')"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+  product-service:
+    image: ${REGISTRY}/product-service:${IMAGE_TAG}
+    container_name: product-service
+    environment:
+      - APP_ENV=production
+    networks:
+      - app-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5002/health')"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+  order-service:
+    image: ${REGISTRY}/order-service:${IMAGE_TAG}
+    container_name: order-service
+    environment:
+      - APP_ENV=production
+      - USER_SERVICE_URL=http://user-service:5001
+      - PRODUCT_SERVICE_URL=http://product-service:5002
+    networks:
+      - app-net
+    restart: unless-stopped
+    depends_on:
+      user-service:
+        condition: service_healthy
+      product-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5003/health')"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - nginx-logs:/var/log/nginx
+    networks:
+      - app-net
+    restart: unless-stopped
+    depends_on:
+      order-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+networks:
+  app-net:
+    driver: bridge
+
+volumes:
+  nginx-logs:
