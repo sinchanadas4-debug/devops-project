@@ -77,3 +77,5 @@ networks:
 
 volumes:
   nginx-logs:
+  prometheus-data:
+  grafana-data:
