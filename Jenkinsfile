@@ -71,7 +71,8 @@ pipeline {
                         scp $SSH_OPTS deploy/docker-compose.prod.yml deploy/deploy.sh $SSH_USER@$EC2_HOST:/opt/app/
                         scp $SSH_OPTS nginx/default.conf $SSH_USER@$EC2_HOST:/opt/app/nginx/
                         scp $SSH_OPTS monitoring/prometheus.yml monitoring/grafana-datasource.yml $SSH_USER@$EC2_HOST:/opt/app/monitoring/
-                        ssh $SSH_OPTS $SSH_USER@$EC2_HOST "sed -i 's/\\r$//' /opt/app/deploy.sh && bash /opt/app/deploy.sh $IMAGE_TAG $REGISTRY"               
+                        ssh $SSH_OPTS $SSH_USER@$EC2_HOST "sed -i 's/\\r$//' /opt/app/deploy.sh && bash /opt/app/deploy.sh $IMAGE_TAG $REGISTRY"
+                    '''
                 }
             }
         }
