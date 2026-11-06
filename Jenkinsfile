@@ -7,7 +7,10 @@ pipeline {
         EC2_HOST   = '43.204.227.194'
         SERVICES   = 'user-service product-service order-service'
     }
-
+    
+    options {
+              disableConcurrentBuilds()
+            }
     triggers {
         pollSCM('H/2 * * * *')
     }
