@@ -20,7 +20,7 @@ printf "REGISTRY=%s\nIMAGE_TAG=%s\n" "$REGISTRY" "$TAG" > .env
 
 echo "Deploying version $TAG..."
 docker compose -f docker-compose.prod.yml pull
-docker compose -f docker-compose.prod.yml up -d --remove-orphans
+docker compose -f docker-compose.prod.yml restart nginx
 
 docker image prune -f
 echo "Deployed version $TAG"
